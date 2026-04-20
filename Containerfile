@@ -60,14 +60,20 @@ RUN case "${GPU_VENDOR}" in \
 # --- Kodi system user ---
 # Explicit UID 1000 so the PipeWire socket path /run/user/1000/ is predictable
 # and can be hardcoded in Quadlet volume mounts.
-RUN useradd \
-    --uid 1000 \
-    --system \
-    --create-home \
-    --home-dir /var/home/kodi \
-    --shell /bin/bash \
-    --groups video,audio,input,render \
-    kodi
+# video/audio/input/render are normally created by udev at runtime; ensure they
+# exist in the build context before adding the user to them.
+RUN groupadd -f video \
+    && groupadd -f audio \
+    && groupadd -f input \
+    && groupadd -f render \
+    && useradd \
+        --uid 1000 \
+        --system \
+        --create-home \
+        --home-dir /var/home/kodi \
+        --shell /bin/bash \
+        --groups video,audio,input,render \
+        kodi
 
 # Enable linger so kodi's user services start without an active login session.
 # loginctl enable-linger does not work in a container build; write the marker file directly.
