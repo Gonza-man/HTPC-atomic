@@ -59,8 +59,9 @@ jobs:
       # Use buildah push with explicit docker:// transport instead.
       - name: Push sidecar image
         run: |
-          DEST="${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.SIDECAR_IMAGE }}"
-          buildah push "${{ env.SIDECAR_IMAGE }}:latest"          "docker://${DEST}:latest"
+          OWNER="${{ github.repository_owner }}"
+          DEST="${{ env.REGISTRY }}/${OWNER,,}/${{ env.SIDECAR_IMAGE }}"
+          buildah push "${{ env.SIDECAR_IMAGE }}:latest"            "docker://${DEST}:latest"
           buildah push "${{ env.SIDECAR_IMAGE }}:${{ github.sha }}" "docker://${DEST}:${{ github.sha }}"
 
   # ---------------------------------------------------------------------------
@@ -119,7 +120,8 @@ jobs:
 
       - name: Push OS image
         run: |
-          DEST="${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.OS_IMAGE }}"
+          OWNER="${{ github.repository_owner }}"
+          DEST="${{ env.REGISTRY }}/${OWNER,,}/${{ env.OS_IMAGE }}"
           for tag in ${{ steps.tags.outputs.tags }}; do
             buildah push "${{ env.OS_IMAGE }}:${tag}" "docker://${DEST}:${tag}"
           done
