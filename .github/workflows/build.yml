@@ -12,7 +12,8 @@ name: Build HTPC image
 
 env:
   REGISTRY: ghcr.io
-  # Short image names (no registry prefix) — push-to-registry appends the registry
+  # Local (short) image names used during the build step.
+  # Full push destinations are constructed as ghcr.io/<owner>/<name> in the push steps.
   SIDECAR_IMAGE: htpc-image/spotify-sidecar
   OS_IMAGE: htpc-image/os
 
@@ -53,12 +54,14 @@ jobs:
           containerfiles: services/spotify-sidecar/Containerfile
           extra-args: --layers
 
+      # push-to-registry@v2 cannot handle paths with >2 slashes
+      # (ghcr.io/owner/htpc-image/spotify-sidecar is 4 components).
+      # Use buildah push with explicit docker:// transport instead.
       - name: Push sidecar image
-        uses: redhat-actions/push-to-registry@v2
-        with:
-          image: ${{ steps.build-sidecar.outputs.image }}
-          tags: ${{ steps.build-sidecar.outputs.tags }}
-          registry: ${{ env.REGISTRY }}/${{ github.repository_owner }}
+        run: |
+          DEST="${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.SIDECAR_IMAGE }}"
+          buildah push "${{ env.SIDECAR_IMAGE }}:latest"          "docker://${DEST}:latest"
+          buildah push "${{ env.SIDECAR_IMAGE }}:${{ github.sha }}" "docker://${DEST}:${{ github.sha }}"
 
   # ---------------------------------------------------------------------------
   # Job 2: build-os
@@ -95,9 +98,8 @@ jobs:
         run: |
           GPU="${{ matrix.gpu }}"
           SHA="${{ github.sha }}"
-          # All GPU variants get a gpu-specific tag pair
           TAGS="latest-${GPU} ${SHA}-${GPU}"
-          # The amd variant is also the default ':latest'
+          # amd is the default variant — also tag it as ':latest'
           if [[ "$GPU" == "amd" ]]; then
             TAGS="${TAGS} latest"
           fi
@@ -116,11 +118,11 @@ jobs:
           extra-args: --layers
 
       - name: Push OS image
-        uses: redhat-actions/push-to-registry@v2
-        with:
-          image: ${{ steps.build-os.outputs.image }}
-          tags: ${{ steps.build-os.outputs.tags }}
-          registry: ${{ env.REGISTRY }}/${{ github.repository_owner }}
+        run: |
+          DEST="${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.OS_IMAGE }}"
+          for tag in ${{ steps.tags.outputs.tags }}; do
+            buildah push "${{ env.OS_IMAGE }}:${tag}" "docker://${DEST}:${tag}"
+          done
 
   # ---------------------------------------------------------------------------
   # Job 3: check-streams
