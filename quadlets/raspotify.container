@@ -1,0 +1,45 @@
+# raspotify.container — Spotify Connect receiver using librespot
+# Upstream image: ghcr.io/dtcooper/raspotify
+#
+# NOTE: Pin this to a specific SHA after first deploy:
+#   podman pull ghcr.io/dtcooper/raspotify:latest
+#   podman inspect ghcr.io/dtcooper/raspotify:latest --format '{{.Digest}}'
+# Then replace Image= below with ghcr.io/dtcooper/raspotify@sha256:<digest>
+
+[Unit]
+Description=Raspotify Spotify Connect receiver
+After=network-online.target
+After=kodi-session.service
+
+[Container]
+Image=ghcr.io/dtcooper/raspotify:latest
+ContainerName=raspotify
+AutoUpdate=registry
+
+# Spotify Connect device identity
+Environment=DEVICE_NAME=TV Sala
+Environment=BITRATE=320
+Environment=SPOTIFY_QUIET=1
+
+# PipeWire/PulseAudio compat socket — kodi user (UID 1000) must have linger enabled
+# so /run/user/1000 exists before this container starts.
+Volume=/run/user/1000:/run/user/1000
+Environment=PULSE_SERVER=unix:/run/user/1000/pulse/native
+Environment=PIPEWIRE_RUNTIME_DIR=/run/user/1000
+
+# Persistent cache (credentials, etc.)
+Volume=/var/lib/raspotify:/var/lib/raspotify
+
+# Host network is required for Spotify Connect mDNS/zeroconf (Avahi) discovery.
+# Without it, the device will not be visible on the LAN.
+Network=host
+
+# Direct audio device access (fallback if PipeWire socket is unavailable)
+AddDevice=/dev/snd
+
+[Service]
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

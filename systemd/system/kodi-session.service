@@ -1,0 +1,21 @@
+[Unit]
+Description=Kodi HTPC kiosk session (cage + kodi-standalone on TTY1)
+After=systemd-logind.service
+After=sound.target
+
+[Service]
+User=kodi
+PAMName=login
+TTYPath=/dev/tty1
+StandardInput=tty
+
+# XDG_RUNTIME_DIR is normally set by pam_systemd; set explicitly as a fallback
+# in case the PAM session is not fully initialised before cage starts.
+Environment=XDG_RUNTIME_DIR=/run/user/1000
+
+ExecStart=/usr/bin/cage -- /usr/bin/kodi-standalone
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=graphical.target

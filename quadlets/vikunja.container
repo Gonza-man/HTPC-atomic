@@ -1,0 +1,27 @@
+# vikunja.container — Vikunja task manager
+# Upstream image: docker.io/vikunja/vikunja
+
+[Unit]
+Description=Vikunja task manager
+After=network-online.target
+
+[Container]
+Image=docker.io/vikunja/vikunja:0.24.6
+ContainerName=vikunja
+AutoUpdate=registry
+
+PublishPort=127.0.0.1:3456:3456
+
+Volume=/var/lib/vikunja:/app/vikunja/files
+
+# SQLite is the simplest setup for a single-node HTPC deployment
+Environment=VIKUNJA_DATABASE_TYPE=sqlite
+Environment=VIKUNJA_DATABASE_PATH=/app/vikunja/files/vikunja.db
+Environment=VIKUNJA_SERVICE_FRONTENDURL=https://tasks.htpc.internal
+
+[Service]
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,26 @@
+# ntfy.container — ntfy push notification service
+# Upstream image: docker.io/binwiederhier/ntfy
+
+[Unit]
+Description=ntfy push notification service
+After=network-online.target
+
+[Container]
+Image=docker.io/binwiederhier/ntfy:v2.11.0
+ContainerName=ntfy
+AutoUpdate=registry
+
+PublishPort=127.0.0.1:8085:80
+
+Volume=/var/lib/ntfy:/var/lib/ntfy
+Volume=/etc/ntfy:/etc/ntfy:ro
+
+# ntfy requires the "serve" subcommand
+Exec=serve
+
+[Service]
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

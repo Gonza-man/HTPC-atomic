@@ -1,0 +1,31 @@
+# headscale.container — Headscale Tailscale-compatible control server
+# Upstream image: ghcr.io/juanfont/headscale
+#
+# Requires manual provisioning of /etc/headscale/config.yaml before first start.
+# See https://headscale.net/setup/install/container/ for the config template.
+# The config file contains your server URL and is NOT baked into the image.
+
+[Unit]
+Description=Headscale VPN control server
+After=network-online.target
+
+[Container]
+Image=ghcr.io/juanfont/headscale:0.24.2
+ContainerName=headscale
+AutoUpdate=registry
+
+# HTTP API / web UI (accessed via Caddy on the WireGuard interface)
+PublishPort=127.0.0.1:8081:8080
+
+# STUN/DERP port — must be exposed on all interfaces for VPN peers to connect
+PublishPort=0.0.0.0:3478:3478/udp
+
+Volume=/var/lib/headscale:/var/lib/headscale
+Volume=/etc/headscale:/etc/headscale:ro
+
+[Service]
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

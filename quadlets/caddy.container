@@ -1,0 +1,33 @@
+# caddy.container — Caddy reverse proxy
+# Upstream image: docker.io/library/caddy
+#
+# Binds on the Headscale/WireGuard interface (100.64.0.x) only.
+# Services are NOT accessible on the LAN — VPN access required.
+#
+# Network=host is required so Caddy can reach backend services on 127.0.0.1.
+
+[Unit]
+Description=Caddy reverse proxy (VPN-only access)
+After=network-online.target
+After=vikunja.service
+After=vaultwarden.service
+After=ntfy.service
+
+[Container]
+Image=docker.io/library/caddy:2.9.1-alpine
+ContainerName=caddy
+AutoUpdate=registry
+
+Volume=/etc/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+Volume=/var/lib/caddy:/data
+Volume=/var/lib/caddy/config:/config
+
+# Host network: Caddy must reach backend services on 127.0.0.1
+Network=host
+
+[Service]
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

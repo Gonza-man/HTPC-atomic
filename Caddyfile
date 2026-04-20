@@ -1,0 +1,81 @@
+# Caddyfile — reverse proxy for HTPC local services
+#
+# Services are exposed ONLY on the Headscale/WireGuard interface (100.64.0.x).
+# They are NOT reachable on the LAN — VPN access is required.
+#
+# TLS: 'tls internal' generates a self-signed cert via Caddy's built-in CA.
+# For a trusted cert, configure DNS-01 ACME instead (see comment below).
+#
+# DNS: configure your Headscale tailnet to resolve *.htpc.internal → 100.64.0.x
+# or add static hosts entries on your client devices.
+
+{
+    # Disable the Caddy admin API (not needed for static config)
+    admin off
+}
+
+# ---------------------------------------------------------------------------
+# Common settings snippet
+# ---------------------------------------------------------------------------
+
+(common) {
+    encode gzip
+
+    header {
+        X-Content-Type-Options  nosniff
+        X-Frame-Options         SAMEORIGIN
+        Referrer-Policy         strict-origin-when-cross-origin
+    }
+}
+
+# ---------------------------------------------------------------------------
+# Vikunja — task manager
+# ---------------------------------------------------------------------------
+
+tasks.htpc.internal {
+    bind 100.64.0.1
+
+    # Option A: self-signed cert (works immediately, browser will warn once)
+    tls internal
+
+    # Option B: Let's Encrypt DNS-01 (requires a public domain + DNS API key)
+    # Uncomment and adapt; store your API key in /etc/htpc/secrets.env and
+    # reference it via an environment variable substitution or Caddy's secrets.
+    # tls {
+    #     dns <provider> {
+    #         api_token {env.CADDY_DNS_API_TOKEN}
+    #     }
+    # }
+
+    import common
+    reverse_proxy localhost:3456
+}
+
+# ---------------------------------------------------------------------------
+# Vaultwarden — password manager
+# ---------------------------------------------------------------------------
+
+vault.htpc.internal {
+    bind 100.64.0.1
+    tls internal
+    import common
+
+    reverse_proxy localhost:8080 {
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+        # WebSocket support for Vaultwarden notifications
+        header_up Connection {>Connection}
+        header_up Upgrade {>Upgrade}
+    }
+}
+
+# ---------------------------------------------------------------------------
+# ntfy — push notifications
+# ---------------------------------------------------------------------------
+
+ntfy.htpc.internal {
+    bind 100.64.0.1
+    tls internal
+    import common
+    reverse_proxy localhost:8085
+}

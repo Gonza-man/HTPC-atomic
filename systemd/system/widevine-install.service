@@ -1,0 +1,19 @@
+[Unit]
+Description=Install Widevine CDM for Chromium (first boot oneshot)
+After=network-online.target
+Wants=network-online.target
+
+# Skip if already installed (idempotency guard at the systemd level).
+# The script itself also checks; this prevents even loading the service after first run.
+ConditionPathExists=!/var/lib/widevine-installed
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/widevine-install.sh
+RemainAfterExit=yes
+
+# Allow up to 5 minutes for the Chrome .deb download + extraction
+TimeoutStartSec=300
+
+[Install]
+WantedBy=multi-user.target

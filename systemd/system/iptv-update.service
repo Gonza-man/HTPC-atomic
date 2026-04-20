@@ -1,0 +1,9 @@
+[Unit]
+Description=IPTV playlist update (download + merge Chilean channels)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/update-playlist.sh
+# Log output goes to the journal; visible via: journalctl -u iptv-update.service

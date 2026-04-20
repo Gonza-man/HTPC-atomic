@@ -1,0 +1,28 @@
+# vaultwarden.container — Vaultwarden (Bitwarden-compatible) password manager
+# Upstream image: docker.io/vaultwarden/server
+
+[Unit]
+Description=Vaultwarden password manager
+After=network-online.target
+
+[Container]
+Image=docker.io/vaultwarden/server:1.32.7
+ContainerName=vaultwarden
+AutoUpdate=registry
+
+PublishPort=127.0.0.1:8080:80
+
+Volume=/var/lib/vaultwarden:/data
+
+# Disable new account signups — this is a private, single-owner deployment.
+# To invite additional users, temporarily set SIGNUPS_ALLOWED=true, invite, then revert.
+Environment=SIGNUPS_ALLOWED=false
+Environment=WEBSOCKET_ENABLED=true
+Environment=DOMAIN=https://vault.htpc.internal
+
+[Service]
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

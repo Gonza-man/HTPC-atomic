@@ -1,0 +1,35 @@
+# spotify-sidecar.container — FastAPI service: /now-playing and /lyrics endpoints
+# Upstream image: built from services/spotify-sidecar/ by the GitHub Actions pipeline
+#
+# Secrets file /etc/htpc/secrets.env must be created manually post-deployment.
+# It must NOT be committed to git. Required variables:
+#   SPOTIFY_CLIENT_ID=<your_client_id>
+#   SPOTIFY_CLIENT_SECRET=<your_client_secret>
+#   SPOTIFY_REFRESH_TOKEN=<your_refresh_token>
+# See README.md §Spotify OAuth2 setup for instructions on obtaining the refresh token.
+
+[Unit]
+Description=Spotify now-playing sidecar API (port 9999)
+After=network-online.target
+
+[Container]
+# Replace <OWNER> with your GitHub username / organisation
+Image=ghcr.io/<OWNER>/htpc-image/spotify-sidecar:latest
+ContainerName=spotify-sidecar
+AutoUpdate=registry
+
+# Bind only to localhost — Caddy is not proxying this; it is consumed by the Kodi addon
+PublishPort=127.0.0.1:9999:9999
+
+# Credentials — file must be provisioned manually; see README
+EnvironmentFile=/etc/htpc/secrets.env
+
+# Persistent volume for token cache
+Volume=/var/lib/spotify-sidecar:/var/lib/spotify-sidecar
+
+[Service]
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

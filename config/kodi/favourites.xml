@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Kodi favourites.xml — streaming service shortcuts
+
+  Each entry launches Chromium in kiosk mode via /usr/local/bin/launch-chromium.sh.
+  The script stops kodi-session.service, runs Chromium fullscreen on TTY1,
+  then restarts kodi-session when Chromium exits.
+
+  cage hosts only one Wayland application at a time, so this stop/start approach
+  is required. The 'thumb' attribute can be set to an icon path or URL.
+
+  To add more services: copy a <favourite> block and change name and URL.
+  After editing, copy the file to /var/home/kodi/.kodi/userdata/favourites.xml
+  and restart Kodi, or use the Kodi UI to manage favourites directly.
+-->
+<favourites>
+
+  <favourite name="HBO Max" thumb="">
+    System.Exec(/usr/local/bin/launch-chromium.sh https://www.max.com)
+  </favourite>
+
+  <favourite name="Prime Video" thumb="">
+    System.Exec(/usr/local/bin/launch-chromium.sh https://www.primevideo.com)
+  </favourite>
+
+  <favourite name="VIX" thumb="">
+    System.Exec(/usr/local/bin/launch-chromium.sh https://www.vix.com)
+  </favourite>
+
+  <favourite name="Mega GO" thumb="">
+    System.Exec(/usr/local/bin/launch-chromium.sh https://www.megago.com)
+  </favourite>
+
+  <favourite name="YouTube" thumb="">
+    System.Exec(/usr/local/bin/launch-chromium.sh https://www.youtube.com)
+  </favourite>
+
+</favourites>

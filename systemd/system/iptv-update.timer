@@ -1,0 +1,16 @@
+[Unit]
+Description=Periodic IPTV playlist refresh
+After=network-online.target
+
+[Timer]
+# Run 5 minutes after boot (gives network time to come up)
+OnBootSec=5min
+# Then re-run every 24 hours
+OnUnitActiveSec=24h
+# Random jitter to avoid hammering iptv-org at the exact same time from many machines
+RandomizedDelaySec=10min
+# If the system was off when the timer would have fired, run it on next boot
+Persistent=true
+
+[Install]
+WantedBy=timers.target

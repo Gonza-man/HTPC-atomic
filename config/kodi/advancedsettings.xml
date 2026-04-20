@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Kodi advancedsettings.xml — HTPC performance tuning
+
+  This file is baked into the image as a skeleton and copied to
+  /var/home/kodi/.kodi/userdata/advancedsettings.xml on first boot via tmpfiles.d.
+  Edits made at runtime survive bootc upgrades (tmpfiles.d uses the 'C' directive
+  which only copies if the destination does not already exist).
+-->
+<advancedsettings>
+
+  <!-- ===== Network / streaming buffer ===== -->
+  <cache>
+    <!-- buffermode 1: buffer all internet streams (important for IPTV) -->
+    <buffermode>1</buffermode>
+    <!-- 80 MB network buffer -->
+    <memorysize>83886080</memorysize>
+    <!-- Read-ahead factor: prefetch up to 20× the average bitrate -->
+    <readfactor>20</readfactor>
+  </cache>
+
+  <network>
+    <curlclienttimeout>20</curlclienttimeout>
+    <curllowtimeout>5</curllowtimeout>
+    <!-- Retry failed connections twice before giving up -->
+    <curlretries>2</curlretries>
+  </network>
+
+  <!-- ===== GUI / rendering ===== -->
+  <gui>
+    <!--
+      algorithmdirtyregions 3: use damage tracking (recommended for Wayland/cage).
+      Reduces GPU load vs. full-screen redraws.
+    -->
+    <algorithmdirtyregions>3</algorithmdirtyregions>
+  </gui>
+
+  <!-- ===== Video library ===== -->
+  <videolibrary>
+    <backgroundupdate>true</backgroundupdate>
+    <importwatchedstate>true</importwatchedstate>
+  </videolibrary>
+
+  <!-- ===== Music library ===== -->
+  <musiclibrary>
+    <backgroundupdate>true</backgroundupdate>
+  </musiclibrary>
+
+  <!-- ===== Logging ===== -->
+  <!-- 0 = normal log level (sufficient for production; use 1 or 2 to debug) -->
+  <loglevel>0</loglevel>
+
+</advancedsettings>

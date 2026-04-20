@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Kodi sources.xml — pre-configured media sources
+
+  EDIT THESE PATHS for your deployment. NFS examples are provided;
+  Samba (smb://) and local paths also work.
+
+  After first boot this file lives at /var/home/kodi/.kodi/userdata/sources.xml.
+  You can also edit sources via the Kodi UI (Files → Add source).
+
+  NOTE: The IPTV source points to /var/lib/iptv/channels.m3u which is written
+  by the iptv-update.timer service on first boot and refreshed daily.
+-->
+<sources>
+
+  <video>
+    <default pathversion="1"></default>
+
+    <!-- === Replace NFS paths with your actual NAS/server paths === -->
+
+    <source>
+      <name>Movies</name>
+      <!-- Example: nfs://192.168.1.100/media/movies/ -->
+      <path pathversion="1">nfs://nas.local/media/movies/</path>
+      <allowsharing>true</allowsharing>
+    </source>
+
+    <source>
+      <name>TV Shows</name>
+      <!-- Example: nfs://192.168.1.100/media/tv/ -->
+      <path pathversion="1">nfs://nas.local/media/tv/</path>
+      <allowsharing>true</allowsharing>
+    </source>
+
+    <source>
+      <name>IPTV Channels</name>
+      <path pathversion="1">/var/lib/iptv/channels.m3u</path>
+      <allowsharing>true</allowsharing>
+    </source>
+
+  </video>
+
+  <music>
+    <default pathversion="1"></default>
+
+    <source>
+      <name>Music</name>
+      <!-- Example: nfs://192.168.1.100/media/music/ -->
+      <path pathversion="1">nfs://nas.local/media/music/</path>
+      <allowsharing>true</allowsharing>
+    </source>
+
+  </music>
+
+  <pictures>
+    <default pathversion="1"></default>
+  </pictures>
+
+  <files>
+    <default pathversion="1"></default>
+  </files>
+
+</sources>

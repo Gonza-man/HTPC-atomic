@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<addon id="plugin.audio.nowplaying"
+       version="1.0.0"
+       name="Now Playing"
+       provider-name="htpc">
+
+  <requires>
+    <import addon="xbmc.python" version="3.0.0"/>
+  </requires>
+
+  <!--
+    xbmc.service: runs as a background service that starts automatically with Kodi.
+    start="startup" means it launches as soon as Kodi finishes loading.
+    After first boot, enable once via: Kodi UI → Add-ons → My add-ons → Services → Now Playing
+  -->
+  <extension point="xbmc.service" library="default.py" start="startup"/>
+
+  <extension point="xbmc.addon.metadata">
+    <summary lang="en_GB">Spotify Now Playing overlay with synced lyrics</summary>
+    <description lang="en_GB">
+      Shows a fullscreen overlay when Spotify Connect is playing: album art,
+      track/artist info, progress bar, and scrolling synced lyrics fetched
+      from the spotify-sidecar API (localhost:9999).
+    </description>
+    <disclaimer lang="en_GB">
+      Requires the spotify-sidecar service to be running on localhost:9999.
+    </disclaimer>
+    <platform>all</platform>
+    <license>MIT</license>
+  </extension>
+
+</addon>
