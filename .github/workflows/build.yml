@@ -12,8 +12,9 @@ name: Build HTPC image
 
 env:
   REGISTRY: ghcr.io
-  OS_IMAGE: ghcr.io/${{ github.repository_owner }}/htpc-image/os
-  SIDECAR_IMAGE: ghcr.io/${{ github.repository_owner }}/htpc-image/spotify-sidecar
+  # Short image names (no registry prefix) — push-to-registry appends the registry
+  SIDECAR_IMAGE: htpc-image/spotify-sidecar
+  OS_IMAGE: htpc-image/os
 
 # ---------------------------------------------------------------------------
 # Job 1: build-sidecar
@@ -23,7 +24,6 @@ jobs:
   build-sidecar:
     name: Build spotify-sidecar image
     runs-on: ubuntu-latest
-    # Only build on push/PR, not the scheduled stream-check
     if: github.event_name != 'schedule'
 
     permissions:
@@ -51,7 +51,6 @@ jobs:
             ${{ github.sha }}
           context: services/spotify-sidecar
           containerfiles: services/spotify-sidecar/Containerfile
-          # Layer caching: reuse layers from the previous push
           extra-args: --layers
 
       - name: Push sidecar image
@@ -59,7 +58,7 @@ jobs:
         with:
           image: ${{ steps.build-sidecar.outputs.image }}
           tags: ${{ steps.build-sidecar.outputs.tags }}
-          registry: "" # already embedded in image name
+          registry: ${{ env.REGISTRY }}/${{ github.repository_owner }}
 
   # ---------------------------------------------------------------------------
   # Job 2: build-os
@@ -69,7 +68,6 @@ jobs:
     name: Build OS image (${{ matrix.gpu }})
     runs-on: ubuntu-latest
     needs: build-sidecar
-    # Run even if sidecar was skipped (scheduled runs skip sidecar)
     if: always() && github.event_name != 'schedule'
 
     permissions:
@@ -95,13 +93,15 @@ jobs:
       - name: Derive image tags
         id: tags
         run: |
-          SHA="${{ github.sha }}"
           GPU="${{ matrix.gpu }}"
-          echo "tags=latest-${GPU} ${SHA}-${GPU}" >> "$GITHUB_OUTPUT"
-          # Also tag as ':latest' for the default (amd) variant
+          SHA="${{ github.sha }}"
+          # All GPU variants get a gpu-specific tag pair
+          TAGS="latest-${GPU} ${SHA}-${GPU}"
+          # The amd variant is also the default ':latest'
           if [[ "$GPU" == "amd" ]]; then
-            echo "tags=latest-${GPU} latest ${SHA}-${GPU}" >> "$GITHUB_OUTPUT"
+            TAGS="${TAGS} latest"
           fi
+          echo "tags=${TAGS}" >> "$GITHUB_OUTPUT"
 
       - name: Build OS image
         id: build-os
@@ -120,7 +120,7 @@ jobs:
         with:
           image: ${{ steps.build-os.outputs.image }}
           tags: ${{ steps.build-os.outputs.tags }}
-          registry: ""
+          registry: ${{ env.REGISTRY }}/${{ github.repository_owner }}
 
   # ---------------------------------------------------------------------------
   # Job 3: check-streams
@@ -129,7 +129,6 @@ jobs:
   check-streams:
     name: Check Chilean IPTV streams
     runs-on: ubuntu-latest
-    # Run on push, PR, and schedule
     if: always()
 
     steps:
@@ -143,4 +142,4 @@ jobs:
         run: |
           chmod +x config/iptv/update-playlist.sh
           bash config/iptv/update-playlist.sh --dry-run
-        # The script exits 1 if zero channels are found, which fails this step.
+        # The script exits 1 if zero channels are found, failing the pipeline.
