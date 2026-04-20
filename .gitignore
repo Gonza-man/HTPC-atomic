@@ -1,0 +1,24 @@
+# Secrets — never commit these
+*.env
+*.secret
+secrets.env
+/etc/htpc/
+
+# Editor / OS artifacts
+.DS_Store
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyc
+*.pyo
+.pytest_cache/
+
+# Build artifacts
+*.tar
+*.deb
