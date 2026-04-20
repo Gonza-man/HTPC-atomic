@@ -35,25 +35,24 @@ RUN dnf install -y \
 #                 This requires Secure Boot to be DISABLED. First boot will be slow.
 RUN case "${GPU_VENDOR}" in \
       amd) \
-        dnf install -y \
+        dnf install -y --skip-unavailable \
           mesa-va-drivers \
           mesa-vdpau-drivers \
-          libva-mesa-driver \
         ;; \
       intel) \
-        dnf install -y \
+        dnf install -y --skip-unavailable \
           intel-media-driver \
           libva-intel-driver \
         ;; \
       nvidia) \
-        dnf install -y \
+        dnf install -y --skip-unavailable \
           akmod-nvidia \
           kernel-devel \
           xorg-x11-drv-nvidia-cuda \
         ;; \
       *) \
-        echo "ERROR: GPU_VENDOR must be amd, intel, or nvidia (got: ${GPU_VENDOR})" >&2 \
-        && exit 1 \
+        echo "ERROR: GPU_VENDOR must be amd, intel, or nvidia (got: ${GPU_VENDOR})" >&2; \
+        exit 1 \
         ;; \
     esac \
     && dnf clean all
